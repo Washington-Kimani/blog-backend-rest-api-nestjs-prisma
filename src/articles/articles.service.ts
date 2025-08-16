@@ -7,17 +7,26 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 export class ArticlesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createArticleDto: CreateArticleDto) {
-    const exists = await this.prisma.article.findFirst({
-      where: { title: createArticleDto.title },
-    });
+  async create(createArticleDto: CreateArticleDto, authorId: number) {
+    const exists =
+      (await this.prisma.article.findFirst({
+        where: { title: createArticleDto.title },
+      })) &&
+      (await this.prisma.article.findFirst({
+        where: { authorId: authorId },
+      }));
 
     if (exists)
       throw new BadRequestException(
-        `Article with title: ${createArticleDto.title} already exists`,
+        `Article with title: ${createArticleDto.title} or AuthorID ${authorId} already exists`,
       );
 
-    return this.prisma.article.create({ data: createArticleDto });
+    return this.prisma.article.create({
+      data: {
+        ...createArticleDto,
+        author: { connect: { id: authorId } },
+      },
+    });
   }
 
   findDrafts() {
@@ -26,6 +35,22 @@ export class ArticlesService {
 
   findAll() {
     return this.prisma.article.findMany({ where: { published: true } });
+  }
+
+  // find all articles from one author
+  async findAllForAuthor(id: number) {
+    const author = this.prisma.user.findFirst({
+      where: { id: id },
+    });
+
+    if (!author)
+      throw new BadRequestException(`Author with id ${id} does not exists`);
+
+    const articles = await this.prisma.article.findMany({
+      where: { authorId: id },
+    });
+
+    return articles;
   }
 
   findOne(id: number) {
