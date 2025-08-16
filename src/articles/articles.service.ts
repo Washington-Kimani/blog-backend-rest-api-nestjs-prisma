@@ -7,17 +7,26 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 export class ArticlesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createArticleDto: CreateArticleDto) {
-    const exists = await this.prisma.article.findFirst({
-      where: { title: createArticleDto.title },
-    });
+  async create(createArticleDto: CreateArticleDto, authorId: number) {
+    const exists =
+      (await this.prisma.article.findFirst({
+        where: { title: createArticleDto.title },
+      })) &&
+      (await this.prisma.article.findFirst({
+        where: { authorId: authorId },
+      }));
 
     if (exists)
       throw new BadRequestException(
-        `Article with title: ${createArticleDto.title} already exists`,
+        `Article with title: ${createArticleDto.title} or AuthorID ${authorId} already exists`,
       );
 
-    return this.prisma.article.create({ data: createArticleDto });
+    return this.prisma.article.create({
+      data: {
+        ...createArticleDto,
+        author: { connect: { id: authorId } },
+      },
+    });
   }
 
   findDrafts() {

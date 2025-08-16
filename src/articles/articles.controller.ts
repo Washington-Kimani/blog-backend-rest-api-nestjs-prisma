@@ -8,6 +8,7 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
@@ -24,9 +25,10 @@ export class ArticlesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiCreatedResponse({ type: ArticleEntity })
-  async create(@Body() createArticleDto: CreateArticleDto) {
+  async create(@Body() createArticleDto: CreateArticleDto, @Request() req) {
+    const authorId = req.user.id;
     return new ArticleEntity(
-      await this.articlesService.create(createArticleDto),
+      await this.articlesService.create(createArticleDto, authorId),
     );
   }
 
