@@ -1,5 +1,3 @@
-// src/main.ts
-
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -12,8 +10,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()
-    .setTitle('Median')
-    .setDescription('The Median API description')
+    .setTitle('CodeFam Blogs')
+    .setDescription('Muciri Kimani blogs API')
     .setVersion('0.1')
     .addBearerAuth()
     .build();
