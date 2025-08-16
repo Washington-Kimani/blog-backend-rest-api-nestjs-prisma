@@ -26,12 +26,18 @@ export class ArticlesService {
         ...createArticleDto,
         author: { connect: { id: authorId } },
       },
+      include: {
+        author: true,
+      },
     });
   }
 
   // get all articles that are not published yet
   findDrafts() {
-    return this.prisma.article.findMany({ where: { published: false } });
+    return this.prisma.article.findMany({
+      where: { published: false },
+      include: { author: true },
+    });
   }
 
   // publish an article
@@ -46,12 +52,16 @@ export class ArticlesService {
     return this.prisma.article.update({
       where: { id },
       data: { published: true },
+      include: { author: true },
     });
   }
 
   // get all articles that are published
   findAll() {
-    return this.prisma.article.findMany({ where: { published: true } });
+    return this.prisma.article.findMany({
+      where: { published: true },
+      include: { author: true },
+    });
   }
 
   // find all articles from one author
@@ -65,6 +75,7 @@ export class ArticlesService {
 
     return this.prisma.article.findMany({
       where: { authorId: id },
+      include: { author: true },
     });
   }
 
