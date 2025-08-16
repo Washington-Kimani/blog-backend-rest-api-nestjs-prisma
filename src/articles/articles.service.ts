@@ -37,6 +37,22 @@ export class ArticlesService {
     return this.prisma.article.findMany({ where: { published: true } });
   }
 
+  // find all articles from one author
+  async findAllForAuthor(id: number) {
+    const author = this.prisma.user.findFirst({
+      where: { id: id },
+    });
+
+    if (!author)
+      throw new BadRequestException(`Author with id ${id} does not exists`);
+
+    const articles = await this.prisma.article.findMany({
+      where: { authorId: id },
+    });
+
+    return articles;
+  }
+
   findOne(id: number) {
     return this.prisma.article.findUnique({
       where: { id },
