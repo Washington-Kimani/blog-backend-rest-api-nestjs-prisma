@@ -29,10 +29,27 @@ export class ArticlesService {
     });
   }
 
+  // get all articles that are not published yet
   findDrafts() {
     return this.prisma.article.findMany({ where: { published: false } });
   }
 
+  // publish an article
+  async publish(id: number) {
+    const article = this.prisma.article.findFirst({
+      where: { id },
+    });
+
+    if (!article)
+      throw new BadRequestException(`Article with id ${id} not found`);
+
+    return this.prisma.article.update({
+      where: { id },
+      data: { published: true },
+    });
+  }
+
+  // get all articles that are published
   findAll() {
     return this.prisma.article.findMany({ where: { published: true } });
   }
@@ -46,11 +63,9 @@ export class ArticlesService {
     if (!author)
       throw new BadRequestException(`Author with id ${id} does not exists`);
 
-    const articles = await this.prisma.article.findMany({
+    return this.prisma.article.findMany({
       where: { authorId: id },
     });
-
-    return articles;
   }
 
   findOne(id: number) {
