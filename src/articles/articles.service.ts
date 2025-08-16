@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
@@ -7,7 +7,16 @@ import { UpdateArticleDto } from './dto/update-article.dto';
 export class ArticlesService {
   constructor(private prisma: PrismaService) {}
 
-  create(createArticleDto: CreateArticleDto) {
+  async create(createArticleDto: CreateArticleDto) {
+    const exists = await this.prisma.article.findFirst({
+      where: { title: createArticleDto.title },
+    });
+
+    if (exists)
+      throw new BadRequestException(
+        `Article with title: ${createArticleDto.title} already exists`,
+      );
+
     return this.prisma.article.create({ data: createArticleDto });
   }
 
